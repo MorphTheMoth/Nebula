@@ -17,7 +17,7 @@ import emu.nebula.command.CommandHandler;
         aliases = {"c", "char"}, 
         permission = "player.character", 
         requireTarget = true,
-        desc = "!c [all | {characterId}] lv(level) a(ascension) s(skill level) t(talent level) f(affinity level)"
+        desc = "!c [all | {characterId}] lv(level) a(ascension) s(all skill level) aa(level) ms(level) ss(level) ult(level) t(talent level) f(affinity level)"
 )
 public class CharacterCommand implements CommandHandler {
 

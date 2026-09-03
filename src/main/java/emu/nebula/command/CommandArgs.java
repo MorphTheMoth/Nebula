@@ -31,7 +31,8 @@ public class CommandArgs {
     private int talent = -1;
     private int skill = -1;
     private int affinity = -1;
-    
+    private int[] skillLevels = new int[] {-1, -1, -1, -1};
+
     private Int2IntMap map;
     private ObjectSet<String> flags;
 
@@ -60,6 +61,18 @@ public class CommandArgs {
                     } else if (arg.startsWith("lvl")) { // Level
                         this.level = Utils.parseSafeInt(arg.substring(3));
                         it.remove();
+                    } else if (arg.length() >= 3 && arg.startsWith("aa")) {
+                        int v = Utils.parseSafeInt(arg.substring(2));
+                        if (v > 0) { this.skillLevels[0] = Math.min(v, 10); it.remove(); }
+                    } else if (arg.length() >= 3 && arg.startsWith("ms")) {
+                        int v = Utils.parseSafeInt(arg.substring(2));
+                        if (v > 0) { this.skillLevels[1] = Math.min(v, 10); it.remove(); }
+                    } else if (arg.length() >= 3 && arg.startsWith("ss")) {
+                        int v = Utils.parseSafeInt(arg.substring(2));
+                        if (v > 0) { this.skillLevels[2] = Math.min(v, 10); it.remove(); }
+                    } else if (arg.length() >= 4 && arg.startsWith("ult")) {
+                        int v = Utils.parseSafeInt(arg.substring(3));
+                        if (v > 0) { this.skillLevels[3] = Math.min(v, 10); it.remove(); }
                     } else if (arg.startsWith("a")) { // Advance
                         this.advance = Utils.parseSafeInt(arg.substring(1));
                         it.remove();
@@ -165,7 +178,26 @@ public class CommandArgs {
                 }
             }
         }
-        
+
+        // Individual skill levels override generic (aa/ms/ss/ult)
+        // e.g. !character 120 aa5 ms4 ss5 ult7
+        boolean hasIndividual = false;
+        for (int lvl : this.skillLevels) {
+            if (lvl > 0) { hasIndividual = true; break; }
+        }
+        if (hasIndividual) {
+            for (int i = 0; i < Math.min(character.getSkills().length, this.skillLevels.length); i++) {
+                int lvl = this.skillLevels[i];
+                if (lvl > 0) {
+                    lvl = Math.min(lvl, 10);
+                    if (character.getSkills()[i] != lvl) {
+                        character.getSkills()[i] = lvl;
+                        hasChanged = true;
+                    }
+                }
+            }
+        }
+
         // Try to set talents
         if (this.getTalent() >= 0) {
             // Clear talents first
