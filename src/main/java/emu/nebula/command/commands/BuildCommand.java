@@ -30,9 +30,23 @@ public class BuildCommand implements CommandHandler {
         // Create record
         var target = args.getTarget();
         var builder = new StarTowerBuildData(target);
+        var nameBuilder = new StringBuilder();
+        boolean inQuote = false;
         
         // Parse items
         for (String arg : args.getList()) {
+            if (inQuote || arg.contains("\"")) {
+                if (nameBuilder.length() > 0) {
+                    nameBuilder.append(" ");
+                }
+                nameBuilder.append(arg.replace("\"", ""));
+
+                if (arg.contains("\"")) {
+                    inQuote = !arg.endsWith("\"");
+                }
+                continue;
+            }
+        
             int id = Utils.parseSafeInt(arg);
             int count = 1;
             
@@ -65,6 +79,12 @@ public class BuildCommand implements CommandHandler {
         
         // Add to star tower manager
         target.getStarTowerManager().addBuild(build);
+
+        // Apply record name after save
+        String name = nameBuilder.toString().trim().replaceAll("\\s+", " ");
+        if (!name.isEmpty()) {
+            build.setName(name);
+        }
         
         // Send package to player
         target.addNextPackage(NetMsgId.st_import_build_notify, build.toProto());
